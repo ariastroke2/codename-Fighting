@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca26fbba6a609ac428f9486e83d62249, type: 3}
+  m_Name: ha_Dive
+  m_EditorClassIdentifier: 
+  AttackClassType: HeavyAerial_1
+  Hitbox:
+    dmg: 5
+    knockback: 5
+    forceDirection: {x: 0.8, y: 0.2}
+    hitbox: {fileID: 7324286873143786605, guid: 37b6bef078a1f8e4f8ef7b4f3f261c36, type: 3}
+    offset: {x: 0, y: -1.5, z: 0}
+    scale: {x: 2, y: 0.5, z: 2}
+    rotation: {x: 0, y: 0, z: 0}
+  Type: 0
+  LockMovement: 1
+  Delay: 0
+  DurationType: 1
+  Duration: 0
+  EndLag: 0.6
+  SpeedType: 2
+  ImpulseVector: {x: 80, y: 10, z: 0}
+  Effects: []
+  SequenceType: 1
+  Next: {fileID: 11400000, guid: 630228667d1410d4da799cd533dafc74, type: 2}

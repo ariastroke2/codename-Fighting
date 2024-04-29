@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca26fbba6a609ac428f9486e83d62249, type: 3}
+  m_Name: hd_Dash
+  m_EditorClassIdentifier: 
+  AttackClassType: HeavyDash
+  Hitbox:
+    dmg: 0
+    knockback: 8
+    forceDirection: {x: 1, y: 0.5}
+    hitbox: {fileID: 7324286873143786605, guid: 37b6bef078a1f8e4f8ef7b4f3f261c36, type: 3}
+    offset: {x: 1, y: 0, z: 0}
+    scale: {x: 1, y: 4, z: 4}
+    rotation: {x: 0, y: 0, z: 0}
+  Type: 0
+  LockMovement: 1
+  Delay: 0.5
+  DurationType: 0
+  Duration: 0.7
+  EndLag: 0.5
+  SpeedType: 1
+  ImpulseVector: {x: 20, y: 0, z: 0}
+  Effects: []
+  SequenceType: 0
+  Next: {fileID: 0}

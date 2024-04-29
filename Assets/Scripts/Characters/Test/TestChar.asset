@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895093a9fb456ab46be1284ce2f74e55, type: 3}
+  m_Name: TestChar
+  m_EditorClassIdentifier: 
+  heavyNeutral: {fileID: 11400000, guid: eddc333d938939e44b0cc74e3d3bd485, type: 2}
+  heavyUp: {fileID: 11400000, guid: cc9ac72ecc3c7ef4695b6fb94d87515f, type: 2}
+  heavyDown: {fileID: 11400000, guid: 54ea23daf463721418285dc4b781d3a4, type: 2}
+  heavySlow: {fileID: 11400000, guid: c0e0b6ce6229c154491440daef1c09c5, type: 2}
+  heavyDash: {fileID: 11400000, guid: 253651b846f88c44b8b4b2c023999c1e, type: 2}
+  heavyAerial: {fileID: 11400000, guid: 8ee0d5451ecd832488c53380ce9289ed, type: 2}
+  lightNeutral: {fileID: 11400000, guid: 506ab32a12f991647a016cda2cb55d67, type: 2}
+  lightUp: {fileID: 11400000, guid: 0efd31b50916e9345ab1998a1b81d03e, type: 2}
+  lightDown: {fileID: 11400000, guid: 57bba6f1f5eb9ba44b2fb4b0191a7e53, type: 2}
+  lightDash: {fileID: 11400000, guid: dafb662611709554b93a37f0464e6b6f, type: 2}
+  lightAerial: {fileID: 11400000, guid: 6c6b1b104c5a67d4e8af20d10a2b944e, type: 2}
+  animatorController: {fileID: 9100000, guid: 1b9a5286a91818848a9faa601367051a, type: 2}
