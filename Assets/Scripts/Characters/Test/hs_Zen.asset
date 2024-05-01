@@ -18,7 +18,7 @@ MonoBehaviour:
     knockback: 20
     forceDirection: {x: 1, y: 0}
     hitbox: {fileID: 8613660605547136968, guid: 5ca60c364dfaa3b4cb336fe151e340db, type: 3}
-    offset: {x: 1, y: 1, z: 0}
+    offset: {x: 1, y: 0.5, z: 0}
     scale: {x: 1, y: 1, z: 1}
     rotation: {x: 0, y: 0, z: 0}
   Type: 2
@@ -26,9 +26,29 @@ MonoBehaviour:
   Delay: 2
   DurationType: 0
   Duration: 0
-  EndLag: 1
+  EndLag: 0.5
   SpeedType: 0
   ImpulseVector: {x: 0, y: 0, z: 0}
-  Effects: []
+  Effects:
+  - obj: {fileID: 3684307954156227368, guid: fccc3807566148e47b2dffc4a6f1f5a2, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0
+  - obj: {fileID: 3159191929199141249, guid: eb37790c02ae8014894a0aa6e7fe13b4, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 1.9
+  - obj: {fileID: 3684307954156227368, guid: 46d5c88aa91d7564d9b9713629ee8447, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: -1
+  - obj: {fileID: 2519541702916711178, guid: f46ec3299f8ba054bb5df3d3d661f302, type: 3}
+    offset: {x: 2, y: 0, z: 0}
+    scale: {x: 0.75, y: 0.5, z: 0.5}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 2
   SequenceType: 0
   Next: {fileID: 0}

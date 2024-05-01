@@ -23,7 +23,7 @@ MonoBehaviour:
     rotation: {x: 0, y: 0, z: 0}
   Type: 2
   LockMovement: 1
-  Delay: 1
+  Delay: 1.5
   DurationType: 0
   Duration: 0
   EndLag: 0.3

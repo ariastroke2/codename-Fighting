@@ -19,8 +19,6 @@ public class InteractiveObject : MonoBehaviour, IDamageable
         
     }
 
-    void IDamageable.RecoverHealth(int dmg) { }
-
     void IDamageable.TakeDamage(int dmg, float knockback, Vector2 forceDirection, int team)
     {
         if(_team != team)

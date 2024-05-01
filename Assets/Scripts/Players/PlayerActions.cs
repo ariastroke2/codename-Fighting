@@ -15,6 +15,7 @@ public class PlayerActions : MonoBehaviour
     public float DashSpeed = 50f;
     public float WalljumpImpulse = 50f;
     public float inputLifespan = 2f;
+    public float ChargeSpeed = 1f;
 
     [Header("Moveset")]
     public AttackCollection attackCollection;
@@ -35,12 +36,17 @@ public class PlayerActions : MonoBehaviour
     private float Timer;
 
     // Attack execution variables
+    private bool _attackButtonHeld;
+    private IEnumerator _attackCoroutine;
+    private float _attackTimer;
+    private float m_attackAccumulatedTimestamp;
+    private float _attackCharge;
+
     private AttackStrengthType m_attackStrengthType;
     private Attack m_currentAttack;
     private Attack m_nextAttack;
     private AttackStatus m_attackStatus;
-    private float m_attackStartTimestamp;
-    private readonly List<CastableObject> m_pendingEffects = new(); // Visual or technical effects to be casted
+    public List<CastableObject> m_pendingEffects = new(); // Visual or technical effects to be casted
     private CastableHitbox m_climaxHitbox = new();     // Hitbox to be casted when attack reaches climax
     private List<GameObject> m_attackHeldObjects = new();    // Updates attack state for objects that persist, ex; lingering fire
 
@@ -223,24 +229,25 @@ public class PlayerActions : MonoBehaviour
 
     public void ExecuteInput(string inputName)
     {
-        if(m_attackStatus == AttackStatus.Sequence || m_attackStatus == AttackStatus.ForcedSequence)
+        // Execute attack sequence
+        if (m_attackStatus == AttackStatus.Sequence || m_attackStatus == AttackStatus.ForcedSequence)
         {
             m_attackStatus = AttackStatus.Charge;
             m_currentAttack = m_nextAttack;
             m_nextAttack = null;
-            CastAttack(m_currentAttack);
+            _attackCoroutine = ExecuteAttack();
+            StartCoroutine(_attackCoroutine);
             return;
         }
-        if (m_attackStatus == AttackStatus.None && m_attackStrengthType == AttackStrengthType.None)
+        // Execute isolated attack
+        if (m_attackStatus == AttackStatus.None)
         {
+            _attackButtonHeld = true;
+            m_attackStatus = AttackStatus.Charge;
             m_attackStrengthType = EnumAttack(inputName);
             AttackCommand();
-            isControlLock = m_currentAttack.LockMovement;
-            m_attackStatus = AttackStatus.Charge;
-            if (m_currentAttack.Type != AttackInputType.OnRelease)
-            {
-                CastAttack(m_currentAttack);
-            }
+            _attackCoroutine = ExecuteAttack();
+            StartCoroutine(_attackCoroutine);
         }
     }
 
@@ -248,11 +255,7 @@ public class PlayerActions : MonoBehaviour
     {
         if (m_attackStrengthType == EnumAttack(inputName))
         {
-            m_attackStrengthType = AttackStrengthType.None;
-            if (m_currentAttack.Type == AttackInputType.OnRelease)
-            {
-                CastAttack(m_currentAttack);
-            }
+            _attackButtonHeld = false;
         }
     }
 
@@ -270,61 +273,15 @@ public class PlayerActions : MonoBehaviour
             }
         }
 
-        // Attack execution
-        foreach (CastableObject item in m_pendingEffects.ToList())
+        // Attack effects
+        /* foreach (CastableObject item in m_pendingEffects.ToList())
         {
             if (Timer > item.delay)
             {
                 CastGameObject(item);
                 m_pendingEffects.Remove(item);
             }
-        }
-        if(m_attackStatus == AttackStatus.Windup && Timer > m_currentAttack.Delay + m_attackStartTimestamp)
-        {
-            CastHitbox(m_climaxHitbox);
-            m_Animator.SetInteger("State", 5);
-            m_attackStatus = AttackStatus.Release;
-        }
-        else if (m_attackStatus == AttackStatus.Release)
-        {
-            bool AttackConditionMet = false;
-            if (m_currentAttack.DurationType == AttackDurationType.UntilDurationExpires) AttackConditionMet = Timer > m_currentAttack.Duration + m_attackStartTimestamp;
-            if (m_currentAttack.DurationType == AttackDurationType.UntilTouchingGround) AttackConditionMet = istouchingGround;
-            if( m_currentAttack.Type == AttackInputType.OnHold) AttackConditionMet = m_attackStrengthType == AttackStrengthType.None;
-            if (AttackConditionMet)
-            {
-                foreach (GameObject item in m_attackHeldObjects)
-                {
-                    if(item != null)
-                        item.GetComponent<IHoldable>()?.EndAttack();
-                }
-                if (m_currentAttack.Next != null)
-                {
-                    m_nextAttack = m_currentAttack.Next;
-                    if (m_currentAttack.SequenceType == AttackSequenceType.Optional)
-                        m_attackStatus = AttackStatus.Sequence;
-                    else
-                        m_attackStatus = AttackStatus.ForcedSequence;
-                }
-                else
-                {
-                    m_attackStatus = AttackStatus.Cooldown;
-                }
-            }
-        }
-        else if(m_attackStatus == AttackStatus.Cooldown || m_attackStatus == AttackStatus.Sequence && Timer > m_currentAttack.EndLag + m_attackStartTimestamp)
-        {
-            foreach (GameObject item in m_attackHeldObjects)
-            {
-                if (item != null)
-                    item.GetComponent<IHoldable>()?.EndCooldown();
-            }
-            m_attackHeldObjects.Clear();
-            m_nextAttack = null;
-            isControlLock = false;
-            m_attackStatus = AttackStatus.None;
-            m_Animator.SetInteger("State", 10);
-        }
+        } */
     }
 
     bool TimerConditions()
@@ -343,6 +300,138 @@ public class PlayerActions : MonoBehaviour
     #endregion
 
     #region Attacks
+
+    IEnumerator ExecuteAttack()
+    {
+        m_attackAccumulatedTimestamp = 0;
+        _attackTimer = 0;
+        _attackCharge = 0;
+        isControlLock = m_currentAttack.LockMovement;
+
+        CastAttack(m_currentAttack);
+        RefreshAttackEffects();
+        // Wait until attack execution conditions are met
+        while (_attackButtonHeld && m_currentAttack.Type == AttackInputType.OnRelease)
+        {
+            if (_attackCharge < 1)
+                _attackCharge += (1 / ChargeSpeed) * Time.deltaTime;
+            yield return null;
+        }
+        if (m_currentAttack.Type != AttackInputType.OnRelease)
+            _attackCharge = 1f;
+        if (_attackCharge > 1)
+            _attackCharge = 1f;
+        // Linear transformation to attack charge
+        _attackCharge = (_attackCharge * 0.5f) + 0.5f;
+
+        while(m_attackStatus == AttackStatus.Windup && _attackTimer < m_currentAttack.Delay)
+        {
+            RefreshAttackEffects();
+            _attackTimer += Time.deltaTime;
+            yield return null;
+        }
+
+        m_attackStatus = AttackStatus.Release;
+        m_attackAccumulatedTimestamp = _attackTimer;
+        UpdateAttackStatus();
+
+        // Wait until attack duration ends
+        bool AttackConditionMet = false;
+        while (m_attackStatus == AttackStatus.Release && !AttackConditionMet)
+        {
+            RefreshAttackEffects();
+            _attackTimer += Time.deltaTime;
+
+            if (m_currentAttack.DurationType == AttackDurationType.UntilDurationExpires) AttackConditionMet = _attackTimer > m_currentAttack.Duration + m_attackAccumulatedTimestamp;
+            if (m_currentAttack.DurationType == AttackDurationType.UntilTouchingGround) AttackConditionMet = istouchingGround;
+            if (m_currentAttack.Type == AttackInputType.OnHold) AttackConditionMet = !_attackButtonHeld;
+
+            yield return null;
+        }
+
+        m_attackStatus = AttackStatus.Cooldown;
+        m_attackAccumulatedTimestamp = _attackTimer;
+        UpdateAttackStatus();
+        
+        // Wait until attack cooldown expires
+        while ((m_attackStatus == AttackStatus.Cooldown || m_attackStatus == AttackStatus.Sequence) && _attackTimer < m_currentAttack.EndLag + m_attackAccumulatedTimestamp)
+        {
+            RefreshAttackEffects();
+            _attackTimer += Time.deltaTime;
+
+            yield return null;
+        }
+
+        if(m_attackStatus != AttackStatus.ForcedSequence)
+        {
+            m_attackStatus = AttackStatus.None;
+            UpdateAttackStatus();
+        }
+    }
+
+    void UpdateAttackStatus()
+    {
+        if(m_attackStatus == AttackStatus.Release)
+        {
+            // Update AttackHoldables state
+            foreach (GameObject item in m_attackHeldObjects)
+            {
+                if (item != null)
+                    item.GetComponent<IAttackHoldable>()?.ReleaseAttack();
+            }
+
+            // Prepare attack
+            CastHitbox(m_climaxHitbox);
+            m_Animator.SetInteger("State", 5);
+        }
+        if(m_attackStatus == AttackStatus.None)
+        {
+            // Update AttackHoldables state
+            foreach (GameObject item in m_attackHeldObjects)
+            {
+                if (item != null)
+                    item.GetComponent<IAttackHoldable>()?.EndCooldown();
+            }
+
+            // Attack ended. Clear all
+            m_attackHeldObjects.Clear();
+            m_nextAttack = null;
+            isControlLock = false;
+            m_attackStrengthType = AttackStrengthType.None;
+            m_Animator.SetInteger("State", 10);
+        }
+        if(m_attackStatus == AttackStatus.Cooldown)
+        {
+            // Update AttackHoldables state
+            foreach (GameObject item in m_attackHeldObjects)
+            {
+                if (item != null)
+                    item.GetComponent<IAttackHoldable>()?.EndAttack();
+            }
+
+            // Check if there is an attack sequence
+            if (m_currentAttack.Next != null)
+            {
+                m_nextAttack = m_currentAttack.Next;
+                if (m_currentAttack.SequenceType == AttackSequenceType.Optional)
+                    m_attackStatus = AttackStatus.Sequence;
+                else
+                    m_attackStatus = AttackStatus.ForcedSequence;
+            }
+        }
+    }
+
+    void RefreshAttackEffects()
+    {
+        foreach (CastableObject item in m_pendingEffects.ToList())
+        {
+            if (_attackTimer > item.delay || item.delay < 0)
+            {
+                CastGameObject(item);
+                m_pendingEffects.Remove(item);
+            }
+        }
+    }
 
     void AttackCommand()
     {
@@ -400,12 +489,11 @@ public class PlayerActions : MonoBehaviour
     void CastAttack(Attack atk)
     {
         m_attackStatus = AttackStatus.Windup;
-        m_attackStartTimestamp = Timer;
         m_climaxHitbox = atk.Hitbox;
         isControlLock = atk.LockMovement;
         foreach (CastableObject item in atk.Effects)
         {
-            m_pendingEffects.Add(item.WithDelay(Timer));
+            m_pendingEffects.Add(item.WithDelay(0));
         }
 
         m_Animator.SetInteger("State", 0);
@@ -417,8 +505,8 @@ public class PlayerActions : MonoBehaviour
         ApplyImpulse(m_currentAttack.ImpulseVector, m_currentAttack.SpeedType);
         GameObject HitboxObj = Instantiate(hitbox.hitbox);
 
-        HitboxObj.GetComponent<IHitbox>()?.SetKnockback(hitbox.knockback);
-        HitboxObj.GetComponent<IHitbox>()?.SetDamage(hitbox.dmg);
+        HitboxObj.GetComponent<IHitbox>()?.SetKnockback(hitbox.knockback * _attackCharge);
+        HitboxObj.GetComponent<IHitbox>()?.SetDamage((int)(hitbox.dmg * _attackCharge));
         HitboxObj.GetComponent<IHitbox>()?.SetForceDirection(new Vector2(hitbox.forceDirection.x * m_playerXDirection, hitbox.forceDirection.y));
 
         // Fix rotations not being applied depending on player orientation
@@ -430,11 +518,20 @@ public class PlayerActions : MonoBehaviour
 
     void CastGameObject(CastableObject castObj)
     {
-        GameObject EffectObj = Instantiate(castObj.obj, transform.position + new Vector3(castObj.offset.x * m_playerXDirection, castObj.offset.y, castObj.offset.z), transform.rotation * Quaternion.Euler(castObj.rotation));
-        if (Mathf.RoundToInt(m_playerXDirection) == -1)
-            EffectObj.transform.Rotate(new Vector3(180, 0, 0));
+        GameObject EffectObj = Instantiate(castObj.obj, transform.position, Quaternion.identity);
+
+        EffectObj.GetComponent<IAttackHoldable>()?.SetTarget(gameObject);
+
+        if (m_playerXDirection < 0)
+            EffectObj.transform.Rotate(new Vector3(0, 180, 0));
+
+        Vector3 newOffset = castObj.offset;
+        newOffset.x *= m_playerXDirection;
+        EffectObj.GetComponent<IAttackHoldable>()?.SetOffset(newOffset);
+
+        EffectObj.transform.position += newOffset;
+        EffectObj.transform.Rotate(castObj.rotation);
         EffectObj.transform.localScale = castObj.scale;
-        EffectObj.transform.parent = transform;
         m_attackHeldObjects.Add(EffectObj);
     }
 

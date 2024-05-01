@@ -18,17 +18,22 @@ MonoBehaviour:
     knockback: 0
     forceDirection: {x: 0, y: 0}
     hitbox: {fileID: 8613660605547136968, guid: 5ca60c364dfaa3b4cb336fe151e340db, type: 3}
-    offset: {x: 1, y: 1, z: -0.5}
-    scale: {x: 1, y: 0.5, z: 0.5}
+    offset: {x: 1, y: 0.5, z: -0.5}
+    scale: {x: 1, y: 0.5, z: 1}
     rotation: {x: 0, y: 0, z: 0}
   Type: 0
   LockMovement: 1
-  Delay: 0.05
+  Delay: 0
   DurationType: 0
-  Duration: 0.15
-  EndLag: 0.3
+  Duration: 0.1
+  EndLag: 0.15
   SpeedType: 0
   ImpulseVector: {x: 0, y: 0, z: 0}
-  Effects: []
+  Effects:
+  - obj: {fileID: 3159191929199141249, guid: eb37790c02ae8014894a0aa6e7fe13b4, type: 3}
+    offset: {x: 0, y: 0, z: 0.2}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0
   SequenceType: 0
   Next: {fileID: 11400000, guid: 8d9ebab8fa7735b4e98d8e9a50d62855, type: 2}

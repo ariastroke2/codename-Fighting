@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PersistentHitbox : MonoBehaviour, IHoldable, IHitbox
+public class PersistentHitbox : MonoBehaviour, IAttackHoldable, IHitbox
 {
     private int _damage;
     private float _knockback;
@@ -83,5 +83,10 @@ public class PersistentHitbox : MonoBehaviour, IHoldable, IHitbox
     void IHitbox.SetTeam(int team)
     {
         throw new System.NotImplementedException();
+    }
+
+    void IAttackHoldable.EndCooldown()
+    {
+        Destroy(gameObject);
     }
 }

@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AttackClassType: HeavyDash
   Hitbox:
-    dmg: 0
+    dmg: 5
     knockback: 8
     forceDirection: {x: 1, y: 0.5}
     hitbox: {fileID: 7324286873143786605, guid: 37b6bef078a1f8e4f8ef7b4f3f261c36, type: 3}
     offset: {x: 1, y: 0, z: 0}
-    scale: {x: 1, y: 4, z: 4}
+    scale: {x: 0.5, y: 2, z: 2}
     rotation: {x: 0, y: 0, z: 0}
-  Type: 0
+  Type: 2
   LockMovement: 1
   Delay: 0.5
   DurationType: 0
@@ -29,6 +29,16 @@ MonoBehaviour:
   EndLag: 0.5
   SpeedType: 1
   ImpulseVector: {x: 20, y: 0, z: 0}
-  Effects: []
+  Effects:
+  - obj: {fileID: 3684307954156227368, guid: 46d5c88aa91d7564d9b9713629ee8447, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: -1
+  - obj: {fileID: 5602082760021540788, guid: 476dffc8d6734644fb4453920fc34a8c, type: 3}
+    offset: {x: 1, y: 0, z: 0}
+    scale: {x: 3, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0.5
   SequenceType: 0
   Next: {fileID: 0}

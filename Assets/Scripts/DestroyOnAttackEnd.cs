@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DestroyOnAttackEnd : MonoBehaviour, IHoldable
+public class DestroyOnAttackEnd : MonoBehaviour, IAttackHoldable
 {
-    public void EndAttack()
+    public void EndCooldown()
     {
         Destroy(gameObject);
     }

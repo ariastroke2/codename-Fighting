@@ -29,6 +29,11 @@ MonoBehaviour:
   EndLag: 0.6
   SpeedType: 2
   ImpulseVector: {x: 80, y: 10, z: 0}
-  Effects: []
+  Effects:
+  - obj: {fileID: 5602082760021540788, guid: 476dffc8d6734644fb4453920fc34a8c, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0
   SequenceType: 1
   Next: {fileID: 11400000, guid: 630228667d1410d4da799cd533dafc74, type: 2}

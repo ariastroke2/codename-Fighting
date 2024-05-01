@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AttackClassType: HeavyAerial_2
   Hitbox:
-    dmg: 0
-    knockback: 0
-    forceDirection: {x: 0, y: 0}
+    dmg: 2
+    knockback: 5
+    forceDirection: {x: 1, y: 1}
     hitbox: {fileID: 8613660605547136968, guid: 5ca60c364dfaa3b4cb336fe151e340db, type: 3}
     offset: {x: 0, y: 0, z: 0}
     scale: {x: 2, y: 2, z: 2}
@@ -29,6 +29,16 @@ MonoBehaviour:
   EndLag: 0
   SpeedType: 0
   ImpulseVector: {x: 30, y: 20, z: 0}
-  Effects: []
+  Effects:
+  - obj: {fileID: 7535070984437769550, guid: e9d42567d37ecb44d90eafa294bc76dd, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0
+  - obj: {fileID: 2519541702916711178, guid: f46ec3299f8ba054bb5df3d3d661f302, type: 3}
+    offset: {x: 0, y: 0, z: 0}
+    scale: {x: 1.5, y: 1.5, z: 1.5}
+    rotation: {x: 0, y: 0, z: 0}
+    delay: 0
   SequenceType: 0
   Next: {fileID: 0}
