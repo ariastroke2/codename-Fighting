@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Drawing;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerActions : MonoBehaviour
+public class PlayerActions : MonoBehaviour, IDamageable
 {
-    [Header("Character Attributes")]
+    [Header("Character Movement Attributes")]
+    public int Team;
+    public int Hp;
+
+    [Header("Character Movement Attributes")]
     public float JumpForce = 0f;
     public float SprintSpeed = 1.5f;
     public float BaseSpeed = 1f;
@@ -38,33 +40,42 @@ public class PlayerActions : MonoBehaviour
     // Attack execution variables
     private bool _attackButtonHeld;
     private IEnumerator _attackCoroutine;
-    private float _attackTimer;
-    private float m_attackAccumulatedTimestamp;
+    public float _attackTimer;
+    public float m_attackAccumulatedTimestamp;
     private float _attackCharge;
-
     private AttackStrengthType m_attackStrengthType;
     private Attack m_currentAttack;
     private Attack m_nextAttack;
     private AttackStatus m_attackStatus;
-    public List<CastableObject> m_pendingEffects = new(); // Visual or technical effects to be casted
+    private List<CastableObject> m_pendingEffects = new(); // Visual or technical effects to be casted
     private CastableHitbox m_climaxHitbox = new();     // Hitbox to be casted when attack reaches climax
     private List<GameObject> m_attackHeldObjects = new();    // Updates attack state for objects that persist, ex; lingering fire
 
     // Unity components
     private Rigidbody m_Rigidbody;
-    private Animator m_Animator;
-    private LayerMask m_TerrainMask;
+    private BoxCollider _boxCollider;
+    [SerializeField] private Animator m_Animator;
+    private LayerMask m_terrainMask;
+    private Transform _modelTransform;
+
+    // Networking components
+    private ulong _netID;
 
     #region Unity MonoBehavior calls
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
-        m_Animator = GetComponent<Animator>();
+        _boxCollider = GetComponent<BoxCollider>();
+        _modelTransform = transform.Find("ModelTransform").transform;
         m_Animator.runtimeAnimatorController = attackCollection.animatorController;
 
-        m_TerrainMask = LayerMask.GetMask("Terrain");
+        m_terrainMask = LayerMask.NameToLayer("Terrain");
         gravityScale = 9f;
         Timer = 0f;
+
+        Entity.DisableCollision(_boxCollider);
+
+        Camera.main.GetComponent<CameraFocuser>().target = transform;
     }
 
     void Update()
@@ -89,7 +100,7 @@ public class PlayerActions : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == 3)
+        if (collision.gameObject.layer == m_terrainMask.value)
         {
             Vector3 DistanceAvg = Vector3.zero;
             foreach (ContactPoint point in collision.contacts)
@@ -107,6 +118,11 @@ public class PlayerActions : MonoBehaviour
                 // Detected wall
             }
 
+        }
+        else
+        {
+            // Contact with non-terrain object
+            // Physics.IgnoreCollision(_boxCollider, collision.collider);
         }
     }
 
@@ -129,7 +145,8 @@ public class PlayerActions : MonoBehaviour
             Vector3 newSpeed = new(m_Dpad.Digitalized.x, 0f, m_Dpad.Digitalized.y);
             if (m_Dpad.Digitalized.x != 0)
                 m_playerXDirection = m_Dpad.Digitalized.x;
-            transform.localScale = new Vector3(2f * m_playerXDirection, transform.localScale.y, transform.localScale.z);
+            // Figure out better code to scale properly, ion like this
+            _modelTransform.rotation = Quaternion.Euler(30, 180 - (90 * m_playerXDirection), 0);
             if (m_IsHoldingSprint)
             {
                 newSpeed *= SprintSpeed;
@@ -146,7 +163,8 @@ public class PlayerActions : MonoBehaviour
 
         Vector3 HorizontalVelocity = m_Rigidbody.velocity;
         HorizontalVelocity.y = 0f;
-        m_Animator.SetFloat("Speed", HorizontalVelocity.magnitude);
+        m_Animator.SetFloat("SpeedX", HorizontalVelocity.magnitude);
+        m_Animator.SetFloat("SpeedY", m_Rigidbody.velocity.y);
 
         m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x * 0.8f, m_Rigidbody.velocity.y, m_Rigidbody.velocity.z * 0.8f);
 
@@ -195,7 +213,8 @@ public class PlayerActions : MonoBehaviour
                     m_Rigidbody.velocity += new Vector3(0, -m_Rigidbody.velocity.y, 0);
                     m_Rigidbody.AddForce(new Vector3(0, JumpForce, 0), ForceMode.Impulse);
                 }
-                else if (Physics.Raycast(transform.position, new Vector3(m_playerXDirection, 0, 0), out RaycastHit hit, 1f, m_TerrainMask))
+                // Fix raycast code please :pleading face
+                else if (Physics.Raycast(transform.position, new Vector3(m_playerXDirection, 0, 0), out RaycastHit hit, 1f, LayerMask.GetMask("Terrain")))
                 {
                     Debug.Log("walljump");
                     m_Rigidbody.velocity += new Vector3(0, -m_Rigidbody.velocity.y, 0);
@@ -232,9 +251,11 @@ public class PlayerActions : MonoBehaviour
         // Execute attack sequence
         if (m_attackStatus == AttackStatus.Sequence || m_attackStatus == AttackStatus.ForcedSequence)
         {
+            _attackButtonHeld = true;
             m_attackStatus = AttackStatus.Charge;
             m_currentAttack = m_nextAttack;
             m_nextAttack = null;
+            StopCoroutine(_attackCoroutine);
             _attackCoroutine = ExecuteAttack();
             StartCoroutine(_attackCoroutine);
             return;
@@ -272,16 +293,6 @@ public class PlayerActions : MonoBehaviour
                 m_inputRegistry.Remove(item);
             }
         }
-
-        // Attack effects
-        /* foreach (CastableObject item in m_pendingEffects.ToList())
-        {
-            if (Timer > item.delay)
-            {
-                CastGameObject(item);
-                m_pendingEffects.Remove(item);
-            }
-        } */
     }
 
     bool TimerConditions()
@@ -307,6 +318,9 @@ public class PlayerActions : MonoBehaviour
         _attackTimer = 0;
         _attackCharge = 0;
         isControlLock = m_currentAttack.LockMovement;
+
+        m_Animator.SetTrigger(m_currentAttack.AttackClassType);
+        m_Animator.SetInteger("State", 0);
 
         CastAttack(m_currentAttack);
         RefreshAttackEffects();
@@ -362,7 +376,7 @@ public class PlayerActions : MonoBehaviour
             yield return null;
         }
 
-        if(m_attackStatus != AttackStatus.ForcedSequence)
+        if (m_attackStatus != AttackStatus.ForcedSequence)
         {
             m_attackStatus = AttackStatus.None;
             UpdateAttackStatus();
@@ -451,11 +465,12 @@ public class PlayerActions : MonoBehaviour
         {
             if (m_attackStrengthType == AttackStrengthType.StrongAttack)
             {
-                if (Command.Last(2) == "/up/up" && m_Dpad.Up)
+                /* if (Command.Last(2) == "/up/up" && m_Dpad.Up)
                     current = attackCollection.heavyUp;
                 else if (Command.Last(2) == "/down/down" && m_Dpad.Down)
                     current = attackCollection.heavyDown;
-                else if (Command.All() == "/back/back/forth" && (m_Dpad.Right || m_Dpad.Left))
+                else */
+                if (Command.All() == "/back/back/forth" && (m_Dpad.Right || m_Dpad.Left))
                     current = attackCollection.heavySlow;
                 else if (Command.Last(2) == "/forth/forth" && (m_Dpad.Right || m_Dpad.Left))
                     current = attackCollection.heavyDash;
@@ -464,11 +479,12 @@ public class PlayerActions : MonoBehaviour
             }
             else
             {
-                if (Command.Last(2) == "/up/up" && m_Dpad.Up)
+                /* if (Command.Last(2) == "/up/up" && m_Dpad.Up)
                     current = attackCollection.lightUp;
                 else if (Command.Last(2) == "/down/down" && m_Dpad.Down)
                     current = attackCollection.lightDown;
-                else if (Command.Last(2) == "/forth/forth" && (m_Dpad.Right || m_Dpad.Left))
+                else */
+                if (Command.Last(2) == "/forth/forth" && (m_Dpad.Right || m_Dpad.Left))
                     current = attackCollection.lightDash;
                 else
                     current = attackCollection.lightNeutral;
@@ -495,9 +511,7 @@ public class PlayerActions : MonoBehaviour
         {
             m_pendingEffects.Add(item.WithDelay(0));
         }
-
-        m_Animator.SetInteger("State", 0);
-        m_Animator.SetTrigger(atk.AttackClassType);
+        
     }
 
     void CastHitbox(CastableHitbox hitbox)
@@ -505,12 +519,15 @@ public class PlayerActions : MonoBehaviour
         ApplyImpulse(m_currentAttack.ImpulseVector, m_currentAttack.SpeedType);
         GameObject HitboxObj = Instantiate(hitbox.hitbox);
 
-        HitboxObj.GetComponent<IHitbox>()?.SetKnockback(hitbox.knockback * _attackCharge);
-        HitboxObj.GetComponent<IHitbox>()?.SetDamage((int)(hitbox.dmg * _attackCharge));
-        HitboxObj.GetComponent<IHitbox>()?.SetForceDirection(new Vector2(hitbox.forceDirection.x * m_playerXDirection, hitbox.forceDirection.y));
+        AttackMessage newAtk = new AttackMessage();
+        newAtk.Damage = (int)(hitbox.dmg * _attackCharge);
+        newAtk.Knockback = hitbox.knockback * _attackCharge;
+        newAtk.ForceDirection = new Vector2(hitbox.forceDirection.x * m_playerXDirection, hitbox.forceDirection.y);
+        newAtk.AttackingTeam = Team;
 
         // Fix rotations not being applied depending on player orientation
         HitboxObj.GetComponent<IHitbox>()?.SetTransform(transform.position + new Vector3(hitbox.offset.x * m_playerXDirection, hitbox.offset.y, hitbox.offset.z), hitbox.scale, transform.rotation * Quaternion.Euler(hitbox.rotation));
+        HitboxObj.GetComponent<IHitbox>()?.SetAttackMessage(newAtk);
 
         HitboxObj.transform.parent = transform;
         m_attackHeldObjects.Add(HitboxObj);
@@ -550,4 +567,32 @@ public class PlayerActions : MonoBehaviour
 
     #endregion
 
+    #region Network
+
+    public NetworkPlayerData GetPlayerState()
+    {
+        NetworkPlayerData newData = new();
+
+        newData.Position = transform.position;
+        newData.HP = Hp;
+        newData.Team = Team;
+
+        return newData;
+    }
+
+    public void SetNetworkId(ulong id)
+    {
+        _netID = id;
+    }
+
+    public void TakeDamage(AttackMessage attackMessage)
+    {
+        if (Team != attackMessage.AttackingTeam)
+        {
+            Hp -= attackMessage.Damage;
+            m_Rigidbody.AddForce(attackMessage.ForceDirection * attackMessage.Knockback, ForceMode.VelocityChange);
+        }
+    }
+
+    #endregion
 }

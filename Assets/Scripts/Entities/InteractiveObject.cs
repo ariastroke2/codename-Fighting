@@ -19,10 +19,10 @@ public class InteractiveObject : MonoBehaviour, IDamageable
         
     }
 
-    void IDamageable.TakeDamage(int dmg, float knockback, Vector2 forceDirection, int team)
+    void IDamageable.TakeDamage(AttackMessage attackMessage)
     {
-        if(_team != team)
-            _rigidbody.AddForce(forceDirection * knockback, ForceMode.VelocityChange);
+        if(_team != attackMessage.AttackingTeam)
+            _rigidbody.AddForce(attackMessage.ForceDirection * attackMessage.Knockback, ForceMode.VelocityChange);
     }
 
 }

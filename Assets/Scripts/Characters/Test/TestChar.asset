@@ -23,4 +23,4 @@ MonoBehaviour:
   lightDown: {fileID: 11400000, guid: 57bba6f1f5eb9ba44b2fb4b0191a7e53, type: 2}
   lightDash: {fileID: 11400000, guid: dafb662611709554b93a37f0464e6b6f, type: 2}
   lightAerial: {fileID: 11400000, guid: 6c6b1b104c5a67d4e8af20d10a2b944e, type: 2}
-  animatorController: {fileID: 9100000, guid: 1b9a5286a91818848a9faa601367051a, type: 2}
+  animatorController: {fileID: 9100000, guid: 1a0c212ce9cc3874bbebcae9b620e979, type: 2}

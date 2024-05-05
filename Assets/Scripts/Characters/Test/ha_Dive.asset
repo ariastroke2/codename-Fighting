@@ -26,7 +26,7 @@ MonoBehaviour:
   Delay: 0
   DurationType: 1
   Duration: 0
-  EndLag: 0.6
+  EndLag: 0.4
   SpeedType: 2
   ImpulseVector: {x: 80, y: 10, z: 0}
   Effects:

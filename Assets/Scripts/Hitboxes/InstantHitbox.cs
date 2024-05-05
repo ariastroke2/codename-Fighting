@@ -4,10 +4,7 @@ public class InstantHitbox : MonoBehaviour, IHitbox
 {
 
     private float Timer;
-    private int _damage;
-    private float _knockback;
-    private int _team;
-    private Vector2 _forceDirection;
+    private AttackMessage _attackMessage;
 
     private void LateUpdate()
     {
@@ -18,25 +15,9 @@ public class InstantHitbox : MonoBehaviour, IHitbox
         }
     }
 
-
     void OnTriggerEnter(Collider col)
     {
-        col.GetComponent<IDamageable>()?.TakeDamage(_damage, _knockback, _forceDirection, _team);
-    }
-
-    void IHitbox.SetDamage(int damage)
-    {
-        _damage = damage;
-    }
-
-    void IHitbox.SetKnockback(float knockback)
-    {
-        _knockback = knockback;
-    }
-
-    void IHitbox.SetForceDirection(Vector2 forceDirection)
-    {
-        _forceDirection = forceDirection;
+        col.GetComponent<IDamageable>()?.TakeDamage(_attackMessage);
     }
 
     void IHitbox.SetTransform(Vector3 offset, Vector3 scale, Quaternion rotation)
@@ -46,8 +27,8 @@ public class InstantHitbox : MonoBehaviour, IHitbox
         transform.rotation = rotation;
     }
 
-    void IHitbox.SetTeam(int team)
+    void IHitbox.SetAttackMessage(AttackMessage attackMessage)
     {
-        throw new System.NotImplementedException();
+        _attackMessage = attackMessage;
     }
 }

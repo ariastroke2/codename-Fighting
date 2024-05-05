@@ -23,17 +23,17 @@ MonoBehaviour:
     rotation: {x: 0, y: 0, z: 0}
   Type: 0
   LockMovement: 1
-  Delay: 0
+  Delay: 0.2
   DurationType: 0
-  Duration: 0.5
-  EndLag: 0.5
+  Duration: 0.1
+  EndLag: 0.1
   SpeedType: 0
   ImpulseVector: {x: 0, y: 0, z: 0}
   Effects:
   - obj: {fileID: 2519541702916711178, guid: f46ec3299f8ba054bb5df3d3d661f302, type: 3}
-    offset: {x: 1.25, y: 0, z: 0}
+    offset: {x: 1.25, y: 0.5, z: 0}
     scale: {x: 0.5, y: 0.5, z: 0.5}
     rotation: {x: 0, y: 0, z: 45}
-    delay: 0
+    delay: 0.2
   SequenceType: 0
   Next: {fileID: 0}

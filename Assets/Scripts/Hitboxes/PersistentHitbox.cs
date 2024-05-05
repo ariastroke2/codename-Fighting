@@ -9,6 +9,8 @@ public class PersistentHitbox : MonoBehaviour, IAttackHoldable, IHitbox
     private int _team;
     private Vector2 _forceDirection;
 
+    private AttackMessage _attackMessage;
+
     public float Delay = 0.25f;
 
     private List<GameObject> Targets;
@@ -30,13 +32,13 @@ public class PersistentHitbox : MonoBehaviour, IAttackHoldable, IHitbox
             {
                 if (DamagedTargets[target] + Delay < Timer)
                 {
-                    target.GetComponent<IDamageable>()?.TakeDamage(_damage, _knockback, _forceDirection, _team);
+                    target.GetComponent<IDamageable>()?.TakeDamage(_attackMessage);
                     DamagedTargets[target] = Timer;
                 }
             }
             else
             {
-                target.GetComponent<IDamageable>()?.TakeDamage(_damage, _knockback, _forceDirection, _team);
+                target.GetComponent<IDamageable>()?.TakeDamage(_attackMessage);
                 DamagedTargets.Add(target, Timer);
             }
         }
@@ -58,21 +60,6 @@ public class PersistentHitbox : MonoBehaviour, IAttackHoldable, IHitbox
         Destroy(gameObject);
     }
 
-    void IHitbox.SetDamage(int damage)
-    {
-        _damage = damage;
-    }
-
-    void IHitbox.SetKnockback(float knockback)
-    {
-        _knockback = knockback;
-    }
-
-    void IHitbox.SetForceDirection(Vector2 forceDirection)
-    {
-        _forceDirection = forceDirection;
-    }
-
     void IHitbox.SetTransform(Vector3 offset, Vector3 scale, Quaternion rotation)
     {
         transform.position += offset;
@@ -80,9 +67,9 @@ public class PersistentHitbox : MonoBehaviour, IAttackHoldable, IHitbox
         transform.rotation = rotation;
     }
 
-    void IHitbox.SetTeam(int team)
+    void IHitbox.SetAttackMessage(AttackMessage attackMessage)
     {
-        throw new System.NotImplementedException();
+        _attackMessage = attackMessage;
     }
 
     void IAttackHoldable.EndCooldown()

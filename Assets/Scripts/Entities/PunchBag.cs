@@ -13,16 +13,13 @@ public class PunchBag : MonoBehaviour, IDamageable
     private Animator _animator;
     public TextMeshPro _text;
 
-    void IDamageable.TakeDamage(int dmg, float knockback, Vector2 forceDirection, int team)
+    void IDamageable.TakeDamage(AttackMessage attackMessage)
     {
-        if (_team != team)
-        {
-            _hp -= dmg;
-            if (_hp > 0)
-                _rigidbody.AddForce(forceDirection * knockback, ForceMode.VelocityChange);
-            else
-                Respawn();
-        }
+        _hp -= attackMessage.Damage;
+        if (_hp > 0)
+            _rigidbody.AddForce(attackMessage.ForceDirection * attackMessage.Knockback, ForceMode.VelocityChange);
+        else
+            Respawn();
     }
 
     void Start()

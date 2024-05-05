@@ -23,10 +23,10 @@ MonoBehaviour:
     rotation: {x: 0, y: 0, z: 0}
   Type: 0
   LockMovement: 1
-  Delay: 0
+  Delay: 0.05
   DurationType: 0
-  Duration: 0.1
-  EndLag: 0.2
+  Duration: 0.05
+  EndLag: 0.15
   SpeedType: 0
   ImpulseVector: {x: 0, y: 0, z: 0}
   Effects:
