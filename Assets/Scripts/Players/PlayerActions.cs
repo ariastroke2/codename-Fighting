@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerActions : MonoBehaviour, IDamageable
 {
@@ -87,7 +88,15 @@ public class PlayerActions : MonoBehaviour, IDamageable
         } else {
             Timer = 0f;
         }
+        if (transform.position.y < -30f)
+            Respawn();
         istouchingGround = (m_GroundChunks.Count > 0);
+    }
+
+    void Respawn()
+    {
+        Hp = 100;
+        transform.position = Vector3.zero;
     }
 
     private void FixedUpdate()
@@ -590,7 +599,9 @@ public class PlayerActions : MonoBehaviour, IDamageable
         if (Team != attackMessage.AttackingTeam)
         {
             Hp -= attackMessage.Damage;
-            m_Rigidbody.AddForce(attackMessage.ForceDirection * attackMessage.Knockback, ForceMode.VelocityChange);
+            m_Rigidbody.AddForce(attackMessage.ForceDirection * attackMessage.Knockback * 10f, ForceMode.VelocityChange);
+            if (Hp < 0)
+                Respawn();
         }
     }
 

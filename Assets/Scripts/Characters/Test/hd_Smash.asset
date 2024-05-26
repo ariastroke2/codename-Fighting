@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca26fbba6a609ac428f9486e83d62249, type: 3}
   m_Name: hd_Smash
   m_EditorClassIdentifier: 
-  AttackClassType: HeavyDown
+  AttackClassType: DownSmash
   Hitbox:
     dmg: 5
     knockback: 5
